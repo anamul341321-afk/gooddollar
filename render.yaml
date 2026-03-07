@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: rest-express-app
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx tsx script/build.ts
+    startCommand: NODE_ENV=production node dist/index.cjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
