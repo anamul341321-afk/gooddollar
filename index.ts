@@ -60,44 +60,28 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
+  try {
+    // রুটগুলো রেজিস্টার করা হচ্ছে
+    await registerRoutes(httpServer, app);
 
-  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // এরর হ্যান্ডলিং মিডলওয়্যার
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      console.error("Internal Server Error:", err);
+      res.status(status).json({ message });
+    });
 
-    console.error("Internal Server Error:", err);
+    // পোর্ট সেটআপ (Render-এর জন্য খুবই জরুরি)
+    const PORT = Number(process.env.PORT) || 10000;
+    
+    // সার্ভার চালু করা
+    httpServer.listen(PORT, '0.0.0.0', () => {
+      log(`সার্ভার সচল হয়েছে পোর্ট: ${PORT}`);
+    });
 
-    if (res.headersSent) {
-      return next(err);
-    }
-
-    return res.status(status).json({ message });
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    const { setupVite } = await import("./vite");
-    await setupVite(httpServer, app);
+  } catch (error) {
+    console.error("সার্ভার চালু করতে সমস্যা হয়েছে:", error);
+    process.exit(1);
   }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
 })();
