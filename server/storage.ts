@@ -1,6 +1,6 @@
 
-import { db } from "./db";
-import { users, transactions, settings, verificationPool, submittedNumbers, resetHistory, type User, type InsertUser, type Transaction, type InsertTransaction } from "../shared/schema";
+import { db } from './db.js';
+import { users, transactions, settings, verificationPool, submittedNumbers, resetHistory, type User, type InsertUser, type Transaction, type InsertTransaction } from '../shared/schema.js';
 import { eq, desc, and, inArray } from "drizzle-orm";
 
 export interface IStorage {

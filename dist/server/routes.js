@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import session from "express-session";
-import { storage } from "./storage";
+import { storage } from './storage.js';
 import { ethers } from "ethers";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";

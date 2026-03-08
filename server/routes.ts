@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
-import { storage } from "./storage";
+import { storage } from './storage.js';
 import { ethers } from "ethers";
 
 declare module "express-session" {

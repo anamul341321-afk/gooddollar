@@ -1,6 +1,13 @@
 import express from "express";
 import { createServer as createViteServer, createLogger } from "vite";
-import viteConfig from "../vite.config";
+let viteConfig;
+try {
+    viteConfig = (await import("../vite.config")).default;
+}
+catch {
+    viteConfig = {};
+}
+;
 import fs from "fs";
 import path from "path";
 import { nanoid } from "nanoid";

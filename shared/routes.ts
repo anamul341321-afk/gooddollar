@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { insertUserSchema, insertTransactionSchema, users, transactions } from './schema';
+import { insertUserSchema, insertTransactionSchema, users, transactions } from './schema.js';
 
 // ============================================
 // SHARED ERROR SCHEMAS

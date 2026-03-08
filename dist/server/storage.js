@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { users, transactions, settings, verificationPool, submittedNumbers, resetHistory } from "../shared/schema";
+import { db } from './db.js';
+import { users, transactions, settings, verificationPool, submittedNumbers, resetHistory } from '../shared/schema.js';
 import { eq, desc, and } from "drizzle-orm";
 export class DatabaseStorage {
     async getUser(id) {
