@@ -10,72 +10,108 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
+### Project Structure
+```
+/
+├── server/          - Backend Express.js server
+│   ├── index.ts    - Server entry point (port 5000)
+│   ├── routes.ts   - API route handlers
+│   ├── db.ts       - Database connection (Drizzle + PostgreSQL)
+│   ├── storage.ts  - Database access layer
+│   ├── vite.ts     - Vite dev middleware + static serving + log()
+│   └── static.ts   - Static file serving for production
+├── client/          - React frontend
+│   ├── index.html  - HTML entry point
+│   └── src/
+│       ├── main.tsx            - React entry point
+│       ├── App.tsx             - Root component with routing
+│       ├── index.css           - Global styles
+│       ├── pages/              - Route-level components
+│       │   ├── Login.tsx
+│       │   ├── Dashboard.tsx
+│       │   ├── AdminPanel.tsx
+│       │   └── AddKeys.tsx
+│       ├── components/         - Reusable components
+│       │   ├── ui/             - shadcn/ui primitives
+│       │   ├── KeySubmitter.tsx
+│       │   ├── WithdrawForm.tsx
+│       │   └── TransactionList.tsx
+│       ├── hooks/              - Custom React hooks
+│       │   ├── use-auth.ts
+│       │   ├── use-earn.ts
+│       │   ├── use-wallet.ts
+│       │   ├── use-toast.ts
+│       │   └── use-mobile.tsx
+│       └── lib/
+│           ├── queryClient.ts  - TanStack Query client
+│           └── utils.ts        - Utility functions
+├── shared/          - Shared types between client and server
+│   ├── schema.ts   - Database schema (Drizzle ORM)
+│   └── routes.ts   - API contract types
+├── vite.config.ts  - Vite build configuration
+├── tailwind.config.ts - Tailwind CSS v3 configuration
+├── postcss.config.js  - PostCSS configuration
+└── drizzle.config.ts  - Database migration configuration
+```
+
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter (lightweight alternative to React Router)
 - **State Management**: TanStack React Query for server state
-- **Styling**: Tailwind CSS with shadcn/ui components (New York style)
+- **Styling**: Tailwind CSS v3 with shadcn/ui components (New York style)
 - **Animations**: Framer Motion for smooth transitions
-- **Build Tool**: Vite with custom plugins for Replit integration
-
-The frontend follows a mobile-first design pattern with dark mode as default and emerald green accents. Components are organized in:
-- `/client/src/pages/` - Route-level components (Login, Dashboard)
-- `/client/src/components/` - Reusable components (KeySubmitter, WithdrawForm, TransactionList)
-- `/client/src/components/ui/` - shadcn/ui primitive components
-- `/client/src/hooks/` - Custom React hooks for auth, wallet, and API interactions
+- **Build Tool**: Vite
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
 - **Database ORM**: Drizzle ORM with PostgreSQL
-- **Session Management**: express-session with MemoryStore (development) or connect-pg-simple (production)
-- **API Pattern**: REST endpoints defined in `/server/routes.ts` with Zod validation
-
-The backend uses a shared schema approach where database models and API contracts are defined in `/shared/` and consumed by both client and server.
+- **Session Management**: express-session with MemoryStore
+- **API Pattern**: REST endpoints in `server/routes.ts`
 
 ### Data Storage
 - **Database**: PostgreSQL via Drizzle ORM
-- **Schema Location**: `/shared/schema.ts`
+- **Schema Location**: `shared/schema.ts`
 - **Tables**:
   - `users` - Guest ID, balance, timestamps
-  - `transactions` - User transactions (earnings/withdrawals) with status tracking
-  - `verification_pool` - Pool of private keys with `addedBy` contributor tracking and `isUsed` status
-  - `submitted_numbers` - Numbers submitted by Telegram admins for payment with bKash/Nagad info
-  - `reset_history` - History of admin resets with phone number, verified count, admin name, payment info, and timestamp
+  - `transactions` - User transactions (earnings/withdrawals)
+  - `verification_pool` - Pool of private keys
+  - `submitted_numbers` - Numbers submitted for payment
+  - `reset_history` - History of admin resets
   - `settings` - Key-value settings store
 
 ### Authentication
-- Guest-based authentication using a simple guest ID stored in localStorage
-- Server-side sessions track authenticated users
-- No password authentication - users create/access accounts by guest ID
+- Guest-based authentication using guest ID (phone number)
+- Server-side sessions with express-session
+- Admin panel with password authentication
 
 ### Key Features
-1. **Private Key Submission**: Users submit GoodDollar private keys which are verified against the GD Identity contract on Celo network
-2. **Balance System**: Verified keys earn 40 TK per submission
-3. **Withdrawals**: Users can request withdrawals via bKash or Nagad with minimum 200 TK threshold
-4. **Transaction History**: Full audit trail of earnings and withdrawals
+1. **Private Key Submission**: Users submit GoodDollar private keys verified on Celo network
+2. **Balance System**: Verified keys earn TK per submission (configurable)
+3. **Withdrawals**: Users request withdrawals via bKash or Nagad
+4. **Transaction History**: Full audit trail
+5. **Admin Panel**: User management, withdrawal approval, key pool management
 
 ## External Dependencies
 
 ### Blockchain Integration
-- **ethers.js v6**: Used for Ethereum/Celo wallet operations
+- **ethers.js v6**: Ethereum/Celo wallet operations
 - **GoodDollar Identity Contract**: `0xC361A6E67822a0EDc17D899227dd9FC50BD62F42` on Celo mainnet
 - **RPC Endpoint**: Celo Forno (`https://forno.celo.org`)
 
-### Notifications
-- **Telegram Bot API**: Sends notifications to admin when keys are submitted or withdrawals requested
-- Bot Token and Chat ID are configured in `/server/routes.ts`
+### Optional Notifications
+- **Telegram Bot API**: Sends notifications when keys submitted or withdrawals requested
+- Configure via `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` environment variables
 
 ### Database
-- **PostgreSQL**: Primary data store
-- **Drizzle Kit**: Database migrations via `npm run db:push`
-- Connection configured via `DATABASE_URL` environment variable
+- **PostgreSQL**: Replit built-in database via `DATABASE_URL`
+- **Drizzle Kit**: Schema management via `npm run db:push`
 
-### UI Components
-- **Radix UI**: Headless component primitives
-- **Lucide React**: Icon library
-- **date-fns**: Date formatting utilities
+## Development
+- Run: `NODE_ENV=development tsx server/index.ts`
+- Port: 5000
+- Database schema push: `npm run db:push`
 
-### Development Tools
-- **Vite**: Development server with HMR
-- **esbuild**: Production bundling for server
-- **TypeScript**: Full type safety across stack
+## Deployment
+- Build: `npm run build`
+- Run: `node dist/index.js`
+- Target: Autoscale
